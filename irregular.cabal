@@ -1,0 +1,22 @@
+name:                irregular
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/githubuser/irregular#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Neil Parikh
+maintainer:          parikh.neil@me.com
+copyright:           2017 Neil Parikh
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:  README.md
+
+executable irregular
+  ghc-options: -Wall
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , parsec
