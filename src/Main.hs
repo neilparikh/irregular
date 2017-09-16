@@ -1,13 +1,9 @@
 module Main where
+
 import Data.List (intersperse)
 
-data Matcher = Lit String -- "abc"
-             | Many Matcher -- many(...)
-             | Many1 Matcher -- many1(...)
-             | Matcher `Or` Matcher -- ... Or ...
-             | OneOf [Matcher] -- One of: [..., ...]
-             | Matcher `And` Matcher -- ... + ...
-             | NTimes Int Matcher -- 3times(...)
+import Types
+import Parser (parseMatcher)
 
 capture :: String -> String
 capture s = "(?:" ++ s ++ ")"
@@ -26,4 +22,8 @@ compile (NTimes n m) = (cnc m) ++ "{" ++ show n ++ "}"
 
 main :: IO ()
 main = do
-  putStrLn $ compile (OneOf [])
+  case (parseMatcher "atLeastOneOf(10Times(\"Abc\"))") of
+    Right m -> do
+      print m
+      putStrLn $ compile m
+    Left _ -> putStrLn "parse error"
