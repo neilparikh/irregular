@@ -2,6 +2,8 @@ module Main where
 
 import System.Environment (getArgs)
 import Data.Either (isRight, rights, lefts)
+import Text.Regex.PCRE
+import Data.Array (elems)
 
 import Parser (parseDefinition)
 import Compiler (compile)
@@ -13,7 +15,10 @@ main = do
     -- thisis = atLeastOneOf(10Times("abc"))
     -- hello1 = atLeastOneOf(10Times("abc")) or ("def" or "qwe")
     -- foobar = atLeastOneOf(10Times("abc")) + ("def" or "qwe")
-    args <- getArgs
+    raw_args <- getArgs
+    let (export, args) = if length raw_args > 0 && head raw_args == "--export"
+                         then (True, tail raw_args)
+                         else (False, raw_args)
     case args of
         [filename] -> do
             rawProg <- readFile filename
@@ -23,10 +28,17 @@ main = do
             if (all isRight raw_env)
             then do
                 let env = rights raw_env ++ [ ("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]
-                -- text <- getLine
+                text <- getLine
                 case (lookup "main" env) of
                     Just m -> do
-                        putStrLn $ compile env m
+                        let regex = compile env m
+                        if export
+                        then putStrLn regex
+                        else do
+                            let matches = elems $ ((text =~ regex) :: MatchArray)
+                            case matches of
+                                [] -> putStrLn "no match"
+                                (x:_) -> print x
                     Nothing -> error "No main matcher"
             else do
                 print $ lefts raw_env
