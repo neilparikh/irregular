@@ -8,6 +8,6 @@ data Matcher = Lit String -- "abc"                        [x]
              | Many1 Matcher -- many1(...)                [x]
              | Matcher `Or` Matcher -- ... Or ...         [x]
              | OneOf [Matcher] -- One of: [..., ...]
-             | Matcher `And` Matcher -- ... + ...
+             | Matcher `And` Matcher -- ... + ...         [x]
              | NTimes Int Matcher -- 3times(...)          [x]
              deriving Show

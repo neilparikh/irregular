@@ -11,10 +11,10 @@ parseMatcher = applyParser matcherParser
     applyParser parser = runParser parser () ""
 
 matcherParser :: Parser Matcher
-matcherParser = try orParser <|> nTimesParser False <|> many1Parser False <|> manyParser False <|> litParser
+matcherParser = try orParser <|> try andParser <|> nTimesParser False <|> many1Parser False <|> manyParser False <|> litParser
 
 parensMatcherParser :: Parser Matcher
-parensMatcherParser = parens orParser <|> nTimesParser True <|> many1Parser True <|> manyParser True <|> litParser
+parensMatcherParser = (try $ parens orParser) <|> (try $ parens andParser) <|> nTimesParser True <|> many1Parser True <|> manyParser True <|> litParser
 
 litParser ::  Parser Matcher
 litParser = Lit <$> doubleQuotes (many (noneOf "\""))
@@ -31,6 +31,9 @@ manyParser withParens = Many <$> (string "many(" *> subParser <* char ')')
 
 orParser :: Parser Matcher
 orParser = Or <$> (parensMatcherParser <* string " or ") <*> parensMatcherParser
+
+andParser :: Parser Matcher
+andParser = And <$> (parensMatcherParser <* string " + ") <*> parensMatcherParser
 
 nTimesParser :: Bool -> Parser Matcher
 nTimesParser withParens = do
