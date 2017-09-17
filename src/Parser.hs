@@ -11,7 +11,7 @@ parseMatcher = applyParser matcherParser
     applyParser parser = runParser parser () ""
 
 matcherParser :: Parser Matcher
-matcherParser = orParser <|> nTimesParser False <|> many1Parser False <|> manyParser False <|> litParser
+matcherParser = try orParser <|> nTimesParser False <|> many1Parser False <|> manyParser False <|> litParser
 
 parensMatcherParser :: Parser Matcher
 parensMatcherParser = parens orParser <|> nTimesParser True <|> many1Parser True <|> manyParser True <|> litParser

@@ -27,3 +27,8 @@ main = do
       print m
       putStrLn $ compile m
     Left err -> print err
+  case (parseMatcher "atLeastOneOf(10Times(\"abc\"))") of
+    Right m -> do
+      print m
+      putStrLn $ compile m
+    Left err -> print err
