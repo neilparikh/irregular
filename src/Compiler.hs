@@ -26,5 +26,6 @@ compile env (Var str) = case (lookup str env) of
 escape :: Char -> String
 escape '(' = "\\("
 escape ')' = "\\)"
+escape '.' = "\\."
 escape '\\' = "\\\\"
 escape c = [c]

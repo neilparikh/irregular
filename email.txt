@@ -1,0 +1,7 @@
+main = username + "@" + domain + "." + tld
+
+username = atLeastOneOf(letter or digit)
+
+domain = atLeastOneOf(letter)
+
+tld = 3Times(letter) or 2Times(letter)
