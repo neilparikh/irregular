@@ -1,4 +1,7 @@
 module Types where
+import Text.Parsec (Parsec)
+
+type Parser a = Parsec String () a
 
 data Matcher = Lit String -- "abc"                        [x]
              | Many Matcher -- many(...)                  [x]

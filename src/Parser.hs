@@ -2,8 +2,7 @@ module Parser where
 import Text.Parsec
 
 import Types
-
-type Parser a = Parsec String () a
+import ParseUtils
 
 parseMatcher :: String -> Either ParseError Matcher
 parseMatcher = applyParser matcherParser
@@ -15,7 +14,7 @@ matcherParser :: Parser Matcher
 matcherParser = nTimesParser <|> many1Parser <|> manyParser <|> litParser
 
 litParser :: Parser Matcher
-litParser = Lit <$> (char '"' *> many (noneOf "\"") <* char '"')
+litParser = Lit <$> doubleQuotes (many (noneOf "\""))
 
 many1Parser :: Parser Matcher
 many1Parser = Many1 <$> (string "atLeastOneOf(" *> matcherParser <* char ')')
