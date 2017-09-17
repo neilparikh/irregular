@@ -28,13 +28,13 @@ main = do
             if (all isRight raw_env)
             then do
                 let env = rights raw_env ++ [ ("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]
-                text <- getLine
                 case (lookup "main" env) of
                     Just m -> do
                         let regex = compile env m
                         if export
                         then putStrLn regex
                         else do
+                            text <- getLine
                             let matches = elems $ ((text =~ regex) :: MatchArray)
                             case matches of
                                 [] -> putStrLn "no match"
