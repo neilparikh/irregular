@@ -3,10 +3,10 @@ module Main where
 import Data.List (intersperse)
 
 import Types
-import Parser (parseMatcher)
+import Parser (parseDefinition)
 
 capture :: String -> String
-capture s = "(?:" ++ s ++ ")"
+capture s = "(" ++ s ++ ")"
 
 cnc :: Matcher -> String
 cnc = capture . compile
@@ -23,12 +23,13 @@ compile (NTimes n m) = (cnc m) ++ "{" ++ show n ++ "}"
 main :: IO ()
 main = do
   -- examples
-  -- atLeastOneOf(10Times("abc"))
-  -- atLeastOneOf(10Times("abc")) or ("def" or "qwe")
-  -- atLeastOneOf(10Times("abc")) + ("def" or "qwe")
+  -- thisis = atLeastOneOf(10Times("abc"))
+  -- hello1 = atLeastOneOf(10Times("abc")) or ("def" or "qwe")
+  -- foobar = atLeastOneOf(10Times("abc")) + ("def" or "qwe")
   command <- getLine
-  case (parseMatcher command) of
-    Right m -> do
+  case (parseDefinition command) of
+    Right (name, m) -> do
+      putStrLn name
       print m
       putStrLn $ compile m
     Left err -> print err

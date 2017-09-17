@@ -4,11 +4,14 @@ import Text.Parsec
 import Types
 import ParseUtils
 
-parseMatcher :: String -> Either ParseError Matcher
-parseMatcher = applyParser matcherParser
+parseDefinition :: String -> Either ParseError Definition
+parseDefinition = applyParser definitionParser
     where
     applyParser :: Parser a -> String -> Either ParseError a
     applyParser parser = runParser parser () ""
+
+definitionParser :: Parser Definition
+definitionParser = (,) <$> ((many1 (noneOf "= ")) <* wrapWithSpaces (char '=')) <*> matcherParser
 
 matcherParser :: Parser Matcher
 matcherParser = try orParser <|> try andParser <|> nTimesParser False <|> many1Parser False <|> manyParser False <|> litParser

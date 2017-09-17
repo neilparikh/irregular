@@ -3,6 +3,8 @@ import Text.Parsec (Parsec)
 
 type Parser a = Parsec String () a
 
+type Definition = (String, Matcher)
+
 data Matcher = Lit String -- "abc"                        [x]
              | Many Matcher -- many(...)                  [x]
              | Many1 Matcher -- many1(...)                [x]
