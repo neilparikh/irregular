@@ -22,8 +22,8 @@ compile (NTimes n m) = (cnc m) ++ "{" ++ show n ++ "}"
 
 main :: IO ()
 main = do
-  case (parseMatcher "atLeastOneOf(10Times(\"Abc\"))") of
+  case (parseMatcher "atLeastOneOf(10Times(\"abc\")) or (\"def\" or \"qwe\")") of
     Right m -> do
       print m
       putStrLn $ compile m
-    Left _ -> putStrLn "parse error"
+    Left err -> print err

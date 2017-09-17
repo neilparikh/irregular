@@ -11,22 +11,34 @@ parseMatcher = applyParser matcherParser
     applyParser parser = runParser parser () ""
 
 matcherParser :: Parser Matcher
-matcherParser = nTimesParser <|> many1Parser <|> manyParser <|> litParser
+matcherParser = orParser <|> nTimesParser False <|> many1Parser False <|> manyParser False <|> litParser
 
-litParser :: Parser Matcher
+parensMatcherParser :: Parser Matcher
+parensMatcherParser = parens orParser <|> nTimesParser True <|> many1Parser True <|> manyParser True <|> litParser
+
+litParser ::  Parser Matcher
 litParser = Lit <$> doubleQuotes (many (noneOf "\""))
 
-many1Parser :: Parser Matcher
-many1Parser = Many1 <$> (string "atLeastOneOf(" *> matcherParser <* char ')')
+many1Parser :: Bool -> Parser Matcher
+many1Parser withParens = Many1 <$> (string "atLeastOneOf(" *> subParser <* char ')')
+    where
+    subParser = if withParens then parensMatcherParser else matcherParser
 
-manyParser :: Parser Matcher
-manyParser = Many <$> (string "many(" *> matcherParser <* char ')')
+manyParser :: Bool -> Parser Matcher
+manyParser withParens = Many <$> (string "many(" *> subParser <* char ')')
+    where
+    subParser = if withParens then parensMatcherParser else matcherParser
 
-nTimesParser :: Parser Matcher
-nTimesParser = do
+orParser :: Parser Matcher
+orParser = Or <$> (parensMatcherParser <* string " or ") <*> parensMatcherParser
+
+nTimesParser :: Bool -> Parser Matcher
+nTimesParser withParens = do
     nStr <- many1  digit
     let n = read nStr
     _ <- string "Times("
-    subMatcher <- matcherParser
+    subMatcher <- subParser
     _ <- char ')'
     return $ NTimes n subMatcher
+    where
+    subParser = if withParens then parensMatcherParser else matcherParser
