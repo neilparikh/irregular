@@ -14,10 +14,10 @@ definitionParser :: Parser Definition
 definitionParser = (,) <$> (validVarName <* wrapWithSpaces (char '=')) <*> matcherParser
 
 matcherParser :: Parser Matcher
-matcherParser = try orParser <|> try and5Parser <|> try and4Parser <|> try and3Parser <|> try andParser <|> nTimesParser False <|> try (many1Parser False) <|> try (manyParser False) <|> litParser <|> varParser
+matcherParser = try orParser <|> try andParser <|> nTimesParser False <|> try (many1Parser False) <|> try (manyParser False) <|> litParser <|> varParser
 
 parensMatcherParser :: Parser Matcher
-parensMatcherParser = (try $ parens orParser) <|> (try $ parens and5Parser) <|> (try $ parens and4Parser) <|> (try $ parens and3Parser) <|> (try $ parens andParser) <|> nTimesParser True <|> try (many1Parser True) <|> try (manyParser True) <|> litParser <|> varParser
+parensMatcherParser = (try $ parens orParser) <|> (try $ parens andParser) <|> nTimesParser True <|> try (many1Parser True) <|> try (manyParser True) <|> litParser <|> varParser
 
 litParser ::  Parser Matcher
 litParser = Lit <$> doubleQuotes (many (noneOf "\""))
@@ -36,28 +36,7 @@ orParser :: Parser Matcher
 orParser = Or <$> (parensMatcherParser <* string " or ") <*> parensMatcherParser
 
 andParser :: Parser Matcher
-andParser = And <$> (parensMatcherParser <* string " + ") <*> parensMatcherParser
-
-and3Parser :: Parser Matcher
-and3Parser = do
-    first <- parensMatcherParser
-    _ <- string " + "
-    rest <- andParser
-    return $ And first rest
-
-and4Parser :: Parser Matcher
-and4Parser = do
-    first <- parensMatcherParser
-    _ <- string " + "
-    rest <- and3Parser
-    return $ And first rest
-
-and5Parser :: Parser Matcher
-and5Parser = do
-    first <- parensMatcherParser
-    _ <- string " + "
-    rest <- and4Parser
-    return $ And first rest
+andParser = And <$> (parensMatcherParser <* string " + ") <*> (try andParser <|> parensMatcherParser)
 
 varParser :: Parser Matcher
 varParser = Var <$> validVarName
