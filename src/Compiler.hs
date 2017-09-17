@@ -7,14 +7,22 @@ import Types
 capture :: String -> String
 capture s = "(" ++ s ++ ")"
 
-cnc :: Matcher -> String
-cnc = capture . compile
+cnc :: [Definition] -> Matcher -> String
+cnc env = capture . compile env
 
-compile :: Matcher -> String
-compile (Lit str) = str
-compile (Many m) = (cnc m) ++ "*"
-compile (Many1 m) = (cnc m) ++ "+"
-compile (m1 `Or` m2) = (cnc m1) ++ "|" ++ (cnc m2)
-compile (OneOf matchers) = concat . intersperse "|" . map cnc $ matchers
-compile (m1 `And` m2) = (cnc m1) ++ (cnc m2)
-compile (NTimes n m) = (cnc m) ++ "{" ++ show n ++ "}"
+compile :: [Definition] -> Matcher -> String
+compile _   (Lit str) = concatMap escape str
+compile env (Many m) = (cnc env m) ++ "*"
+compile env (Many1 m) = (cnc env m) ++ "+"
+compile env (m1 `Or` m2) = (cnc env m1) ++ "|" ++ (cnc env m2)
+compile env (OneOf matchers) = concat . intersperse "|" . map (cnc env) $ matchers
+compile env (m1 `And` m2) = (cnc env m1) ++ (cnc env m2)
+compile env (NTimes n m) = (cnc env m) ++ "{" ++ show n ++ "}"
+compile env (Var str) = case (lookup str env) of
+    Just m -> compile env m
+    Nothing -> error ("undeclared variable " ++ str ++ " used")
+
+escape :: Char -> String
+escape '(' = "\\("
+escape ')' = "\\)"
+escape c = [c]

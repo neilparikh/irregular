@@ -1,0 +1,2 @@
+main = areaCode + " " + 3Times("1") + "-" + 4Times("1")
+areaCode = "(" + (3Times("1") + ")")
