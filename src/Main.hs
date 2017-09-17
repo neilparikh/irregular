@@ -22,7 +22,7 @@ main = do
 
             if (all isRight raw_env)
             then do
-                let env = rights raw_env ++ [("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]")]
+                let env = rights raw_env ++ [ ("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]
                 -- text <- getLine
                 case (lookup "main" env) of
                     Just m -> do

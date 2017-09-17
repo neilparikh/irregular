@@ -23,12 +23,12 @@ litParser ::  Parser Matcher
 litParser = Lit <$> doubleQuotes (many (noneOf "\""))
 
 many1Parser :: Bool -> Parser Matcher
-many1Parser withParens = Many1 <$> (string "atLeastOneOf(" *> subParser <* char ')')
+many1Parser withParens = Many1 <$> (string "oneOrMore(" *> subParser <* char ')')
     where
     subParser = if withParens then parensMatcherParser else matcherParser
 
 manyParser :: Bool -> Parser Matcher
-manyParser withParens = Many <$> (string "many(" *> subParser <* char ')')
+manyParser withParens = Many <$> (string "zeroOrMore(" *> subParser <* char ')')
     where
     subParser = if withParens then parensMatcherParser else matcherParser
 
