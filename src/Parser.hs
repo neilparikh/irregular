@@ -64,7 +64,7 @@ varParser = Var <$> validVarName
 
 nTimesParser :: Bool -> Parser Matcher
 nTimesParser withParens = do
-    nStr <- many1  digit
+    nStr <- many1 digit
     let n = read nStr
     _ <- string "Times("
     subMatcher <- subParser
@@ -74,4 +74,4 @@ nTimesParser withParens = do
     subParser = if withParens then parensMatcherParser else matcherParser
 
 validVarName :: Parser String
-validVarName = many1 (noneOf "\"= ")
+validVarName = many1 (letter)

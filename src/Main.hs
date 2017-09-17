@@ -5,6 +5,7 @@ import Data.Either (isRight, rights, lefts)
 
 import Parser (parseDefinition)
 import Compiler (compile)
+import Types ( Matcher(Raw) )
 
 main :: IO ()
 main = do
@@ -21,7 +22,7 @@ main = do
 
             if (all isRight raw_env)
             then do
-                let env = rights raw_env
+                let env = rights raw_env ++ [("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]")]
                 -- text <- getLine
                 case (lookup "main" env) of
                     Just m -> do

@@ -13,4 +13,5 @@ data Matcher = Lit String -- "abc"                        [x]
              | Matcher `And` Matcher -- ... + ...         [x]
              | NTimes Int Matcher -- 3times(...)          [x]
              | Var String -- foobar                       [x]
+             | Raw String -- raw regex: /ab+/             [ ]
              deriving Show

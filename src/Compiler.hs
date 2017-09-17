@@ -12,6 +12,7 @@ cnc env = capture . compile env
 
 compile :: [Definition] -> Matcher -> String
 compile _   (Lit str) = concatMap escape str
+compile _   (Raw regex) = regex
 compile env (Many m) = (cnc env m) ++ "*"
 compile env (Many1 m) = (cnc env m) ++ "+"
 compile env (m1 `Or` m2) = (cnc env m1) ++ "|" ++ (cnc env m2)
@@ -25,4 +26,5 @@ compile env (Var str) = case (lookup str env) of
 escape :: Char -> String
 escape '(' = "\\("
 escape ')' = "\\)"
+escape '\\' = "\\\\"
 escape c = [c]
