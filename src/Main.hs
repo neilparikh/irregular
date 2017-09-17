@@ -22,17 +22,12 @@ compile (NTimes n m) = (cnc m) ++ "{" ++ show n ++ "}"
 
 main :: IO ()
 main = do
-  case (parseMatcher "atLeastOneOf(10Times(\"abc\")) or (\"def\" or \"qwe\")") of
-    Right m -> do
-      print m
-      putStrLn $ compile m
-    Left err -> print err
-  case (parseMatcher "atLeastOneOf(10Times(\"abc\"))") of
-    Right m -> do
-      print m
-      putStrLn $ compile m
-    Left err -> print err
-  case (parseMatcher "atLeastOneOf(10Times(\"abc\")) or (\"def\" + \"qwe\")") of
+  -- examples
+  -- atLeastOneOf(10Times("abc"))
+  -- atLeastOneOf(10Times("abc")) or ("def" or "qwe")
+  -- atLeastOneOf(10Times("abc")) + ("def" or "qwe")
+  command <- getLine
+  case (parseMatcher command) of
     Right m -> do
       print m
       putStrLn $ compile m
