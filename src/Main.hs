@@ -26,7 +26,6 @@ main = do
                 -- text <- getLine
                 case (lookup "main" env) of
                     Just m -> do
-                        print m
                         putStrLn $ compile env m
                     Nothing -> error "No main matcher"
             else do
