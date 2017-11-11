@@ -9,8 +9,11 @@ import Compiler (compile)
 import Types ( Matcher(Raw) )
 
 
+lengthOfModifiers :: Int
+lengthOfModifiers = length "\x1b[102m" + length "\x1b[0m"
+
 modifyOffsets :: [(MatchOffset, MatchLength)] -> [(MatchOffset, MatchLength)]
-modifyOffsets offsets = map (\((i, len), pos) -> (i + 10 * pos, len)) $ zip offsets [0..]
+modifyOffsets offsets = map (\((i, len), pos) -> (i + lengthOfModifiers * pos, len)) $ zip offsets [0..]
 
 highlightSingleMatch :: String -> (MatchOffset, MatchLength) -> String
 highlightSingleMatch str (i, len) = (take i str) ++ "\x1b[102m" ++ (take len $ drop i str) ++ "\x1b[0m" ++ drop (i + len) str
