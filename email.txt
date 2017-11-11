@@ -1,7 +1,7 @@
 main = username + "@" + domain + "." + tld
 
-username = oneOrMore(char)
+username = oneOrMore(char or ".")
 
-domain = oneOrMore(char)
+domain = oneOrMore(char or ".")
 
 tld = 3Times(char) or 2Times(char)
