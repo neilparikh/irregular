@@ -3,11 +3,17 @@ module Main where
 import System.Environment (getArgs)
 import Data.Either (isRight, rights, lefts)
 import Text.Regex.PCRE
-import Data.Array (elems)
 
 import Parser (parseDefinition)
 import Compiler (compile)
 import Types ( Matcher(Raw) )
+
+
+modifyOffsets :: [(MatchOffset, MatchLength)] -> [(MatchOffset, MatchLength)]
+modifyOffsets offsets = map (\((i, len), pos) -> (i + 10 * pos, len)) $ zip offsets [0..]
+
+highlightSingleMatch :: String -> (MatchOffset, MatchLength) -> String
+highlightSingleMatch str (i, len) = (take i str) ++ "\x1b[102m" ++ (take len $ drop i str) ++ "\x1b[0m" ++ drop (i + len) str
 
 main :: IO ()
 main = do
@@ -35,16 +41,10 @@ main = do
                         then putStrLn regex
                         else do
                             text <- getLine
-                            let matches = elems $ ((text =~ regex) :: MatchArray)
+                            let matches = modifyOffsets $ getAllMatches ((text =~ regex) :: AllMatches [] (MatchOffset, MatchLength))
                             case matches of
                                 [] -> putStrLn "no match"
-                                ((i, len):_) -> do
-                                    -- Note: only highlights the first match
-                                    putStr $ take i text
-                                    putStr "\x1b[102m"
-                                    putStr $ take len $ drop i text
-                                    putStr "\x1b[0m"
-                                    putStrLn $ drop (i + len) text
+                                _ -> putStrLn $ foldl highlightSingleMatch text matches
                     Nothing -> error "No main matcher"
             else do
                 print $ lefts raw_env
