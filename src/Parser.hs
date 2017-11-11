@@ -33,10 +33,10 @@ manyParser withParens = Many <$> (string "zeroOrMore(" *> subParser <* char ')')
     subParser = if withParens then parensMatcherParser else matcherParser
 
 orParser :: Parser Matcher
-orParser = Or <$> (parensMatcherParser <* string " or ") <*> parensMatcherParser
+orParser = Or <$> (parensMatcherParser <* wrapWithSpaces (string "or")) <*> (try orParser <|> parensMatcherParser)
 
 andParser :: Parser Matcher
-andParser = And <$> (parensMatcherParser <* string " + ") <*> (try andParser <|> parensMatcherParser)
+andParser = And <$> (parensMatcherParser <* wrapWithSpaces (string "+")) <*> (try andParser <|> parensMatcherParser)
 
 varParser :: Parser Matcher
 varParser = Var <$> validVarName
