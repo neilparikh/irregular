@@ -38,14 +38,13 @@ main = do
                             let matches = elems $ ((text =~ regex) :: MatchArray)
                             case matches of
                                 [] -> putStrLn "no match"
-                                ((i, j):_) -> do
-                                    -- Note: this highlights is pretty bad
-                                    -- only highlights the first match
+                                ((i, len):_) -> do
+                                    -- Note: only highlights the first match
                                     putStr $ take i text
                                     putStr "\x1b[102m"
-                                    putStr $ take (j-i) $ drop i text
+                                    putStr $ take len $ drop i text
                                     putStr "\x1b[0m"
-                                    putStrLn $ drop (j) text
+                                    putStrLn $ drop (i + len) text
                     Nothing -> error "No main matcher"
             else do
                 print $ lefts raw_env
