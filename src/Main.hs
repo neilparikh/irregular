@@ -31,13 +31,14 @@ main = do
     case args of
         [filename] -> do
             rawProg <- readFile filename
+            let mainName = takeWhile (/= '.') filename
             let commands = filter (/= "") . lines $ rawProg
             let raw_env = map parseDefinition commands
 
             if (all isRight raw_env)
             then do
                 let env = rights raw_env ++ [ ("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]
-                case (lookup "main" env) of
+                case (lookup mainName env) of
                     Just m -> do
                         let regex = compile env m
                         if export

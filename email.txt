@@ -1,4 +1,4 @@
-main = username + "@" + domain + "." + tld
+email = username + "@" + domain + "." + tld
 
 username = oneOrMore(char or "." or "-")
 
