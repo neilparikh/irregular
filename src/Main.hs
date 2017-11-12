@@ -8,14 +8,16 @@ import Parser (parseDefinition)
 import Compiler (compile, initialEnv)
 
 
-lengthOfModifiers :: Int
-lengthOfModifiers = length "\x1b[102m" + length "\x1b[0m"
-
-modifyOffsets :: [(MatchOffset, MatchLength)] -> [(MatchOffset, MatchLength)]
-modifyOffsets offsets = map (\((i, len), pos) -> (i + lengthOfModifiers * pos, len)) $ zip offsets [0..]
-
-highlightSingleMatch :: String -> (MatchOffset, MatchLength) -> String
-highlightSingleMatch str (i, len) = (take i str) ++ "\x1b[102m" ++ (take len $ drop i str) ++ "\x1b[0m" ++ drop (i + len) str
+highlightString :: String -> [(MatchOffset, MatchLength)] -> String
+highlightString text = highlightString' (zip text [0..])
+    where
+    highlightString' :: [(Char, Int)] -> [(MatchOffset, MatchLength)] -> String
+    highlightString' [] _ = []
+    highlightString' ((c, pos):xs) ranges@((i, len):ys)
+        | pos == i = "\x1b[102m" ++ c:(highlightString' xs ((i, len):ys)) -- start of highlight range
+        | pos == i + len - 1 = c:"\x1b[0m" ++ (highlightString' xs ys) -- end of highlight range
+        | otherwise = c:(highlightString' xs ranges) -- inside or outside a highlight range
+    highlightString' input [] = map fst input
 
 main :: IO ()
 main = do
@@ -44,10 +46,10 @@ main = do
                         then putStrLn regex
                         else do
                             text <- getLine
-                            let matches = modifyOffsets $ getAllMatches ((text =~ regex) :: AllMatches [] (MatchOffset, MatchLength))
+                            let matches = getAllMatches ((text =~ regex) :: AllMatches [] (MatchOffset, MatchLength))
                             case matches of
                                 [] -> putStrLn "no match"
-                                _ -> putStrLn $ foldl highlightSingleMatch text matches
+                                _ -> putStrLn $ highlightString text matches
                     Nothing -> error "No main matcher"
             else do
                 print $ lefts raw_env
