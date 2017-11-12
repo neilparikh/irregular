@@ -5,8 +5,7 @@ import Data.Either (isRight, rights, lefts)
 import Text.Regex.PCRE
 
 import Parser (parseDefinition)
-import Compiler (compile)
-import Types ( Matcher(Raw) )
+import Compiler (compile, initialEnv)
 
 
 lengthOfModifiers :: Int
@@ -37,7 +36,7 @@ main = do
 
             if (all isRight raw_env)
             then do
-                let env = rights raw_env ++ [ ("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]
+                let env = rights raw_env ++ initialEnv
                 case (lookup mainName env) of
                     Just m -> do
                         let regex = compile env m

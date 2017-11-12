@@ -4,6 +4,9 @@ import Data.List (intersperse)
 
 import Types
 
+initialEnv :: [Definition]
+initialEnv = [("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]
+
 capture :: String -> String
 capture s = "(" ++ s ++ ")"
 
