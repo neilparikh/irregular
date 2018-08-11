@@ -25,4 +25,3 @@ executable irregular
   build-depends:       base >= 4.7 && < 5
                      , parsec
                      , regex-pcre
-                     , array
