@@ -1,8 +1,21 @@
 module Compiler where
 
 import Data.List (intersperse)
+import Data.Either (isRight, rights, lefts)
 
+import Parser (parseDefinition)
 import Types
+
+compileProg :: String -> String -> Either CompileError String
+compileProg prog mainName
+    | all isRight rawEnv = case (lookup mainName env) of
+        Just m -> Right (compile env m)
+        Nothing -> Left NoMainMatcher
+    | otherwise = Left . ParseErrors $ lefts rawEnv
+    where
+    commands = filter (/= "") . lines $ prog
+    rawEnv = map parseDefinition commands
+    env = rights rawEnv ++ initialEnv
 
 initialEnv :: [Definition]
 initialEnv = [("digit", Raw "\\d"), ("letter", Raw "[a-zA-Z]"), ("char", Raw "\\w")]

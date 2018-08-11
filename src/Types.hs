@@ -1,5 +1,5 @@
 module Types where
-import Text.Parsec (Parsec)
+import Text.Parsec (Parsec, ParseError)
 
 type Parser a = Parsec String () a
 
@@ -15,3 +15,6 @@ data Matcher = Lit String -- "abc"                        [x]
              | Var String -- foobar                       [x]
              | Raw String -- raw regex: /ab+/             [ ]
              deriving Show
+
+data CompileError = ParseErrors [ParseError]
+                  | NoMainMatcher

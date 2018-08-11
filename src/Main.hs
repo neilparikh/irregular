@@ -1,11 +1,10 @@
 module Main where
 
 import System.Environment (getArgs)
-import Data.Either (isRight, rights, lefts)
 import Text.Regex.PCRE
 
-import Parser (parseDefinition)
-import Compiler (compile, initialEnv)
+import Types (CompileError(..))
+import Compiler (compileProg)
 
 
 highlightString :: String -> [(MatchOffset, MatchLength)] -> String
@@ -33,26 +32,16 @@ main = do
         [filename] -> do
             rawProg <- readFile filename
             let mainName = takeWhile (/= '.') filename
-            let commands = filter (/= "") . lines $ rawProg
-            let raw_env = map parseDefinition commands
-
-            if (all isRight raw_env)
-            then do
-                let env = rights raw_env ++ initialEnv
-                case (lookup mainName env) of
-                    Just m -> do
-                        let regex = compile env m
-                        if export
-                        then putStrLn regex
-                        else do
-                            text <- getLine
-                            let matches = getAllMatches ((text =~ regex) :: AllMatches [] (MatchOffset, MatchLength))
-                            case matches of
-                                [] -> putStrLn "no match"
-                                _ -> putStrLn $ highlightString text matches
-                    Nothing -> error "No main matcher"
-            else do
-                print $ lefts raw_env
-                error "error parsing commands"
-
+            case (compileProg rawProg mainName) of
+                Right regex -> do
+                    if export
+                    then putStrLn regex
+                    else do
+                        text <- getLine
+                        let matches = getAllMatches ((text =~ regex) :: AllMatches [] (MatchOffset, MatchLength))
+                        case matches of
+                            [] -> putStrLn "no match"
+                            _ -> putStrLn $ highlightString text matches
+                Left NoMainMatcher -> error "No main matcher"
+                Left (ParseErrors errors) -> print errors >> error "error parsing commands"
         _ -> putStrLn "incorrect number of command line arguements"
