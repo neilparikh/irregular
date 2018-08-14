@@ -7,13 +7,13 @@ import Text from './Text';
 interface IState {
   program: string;
   text: string;
-  regex?: any;
+  highlightedString?: any;
 }
 
 class App extends React.Component<{}, IState> {
   constructor(props: {}) {
     super(props);
-    this.state = { program: "main = 2Times(char)", text: "aa" }
+    this.state = { program: "main = 2Times(digit)", text: "I have 10 apples." }
   }
 
   setProgram = (event: React.FormEvent<HTMLTextAreaElement>) => {
@@ -21,24 +21,28 @@ class App extends React.Component<{}, IState> {
   }
 
   setText = (event: React.FormEvent<HTMLTextAreaElement>) => {
-    this.setState({ program: event.currentTarget.value })
+    this.setState({ text: event.currentTarget.value })
   }
 
   compile = () => {
     this.setState((prevState) => {
-      const { program } = prevState;
+      const { program, text } = prevState;
       const req = new Request(
-        "http://localhost:3000/compile",
-        { method: "POST", body: `"${program}"`, headers: new Headers({'Content-Type': 'application/json'}) }
+        "http://localhost:3000/match",
+        {
+          method: "POST",
+          body: JSON.stringify({ program, text}),
+          headers: new Headers({'Content-Type': 'application/json'}),
+        }
       );
       fetch(req, { method: "POST" }).then(response => response.json()).then((body) => {
-        this.setState({ regex: new RegExp(body, 'g') });
+        this.setState({ highlightedString: body });
       });
     });
   }
 
   public render() {
-    const { program, text } = this.state;
+    const { program, text, highlightedString } = this.state;
 
     return (
       <div className="App">
@@ -47,7 +51,9 @@ class App extends React.Component<{}, IState> {
         </header>
         <ProgramEditor program={program} onChange={this.setProgram}/><br />
         <Text text={text} onChange={this.setText} /><br />
-        <button onClick={this.compile}>Compile</button>
+        <button onClick={this.compile}>Find Matches</button>
+        {highlightedString &&
+          <div id="highlightedString" dangerouslySetInnerHTML={{ __html: highlightedString }}/>}
       </div>
     );
   }

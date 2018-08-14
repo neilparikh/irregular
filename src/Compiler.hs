@@ -38,6 +38,8 @@ compile env (NTimes n m) = (cnc env m) ++ "{" ++ show n ++ "}"
 compile env (Var str) = case (lookup str env) of
     Just m -> compile env m
     Nothing -> error ("undeclared variable " ++ str ++ " used")
+    -- FIXME: instead of calling error here, should instead return an Either CompileError String
+    -- so an error can be shown to the user
 
 escape :: Char -> String
 escape '(' = "\\("

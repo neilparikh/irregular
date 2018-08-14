@@ -1,22 +1,11 @@
 module Main where
 
 import System.Environment (getArgs)
-import Text.Regex.PCRE
 
 import Types (CompileError(..))
 import Compiler (compileProg)
+import Util (matchText)
 
-
-highlightString :: String -> [(MatchOffset, MatchLength)] -> String
-highlightString text = highlightString' (zip text [0..])
-    where
-    highlightString' :: [(Char, Int)] -> [(MatchOffset, MatchLength)] -> String
-    highlightString' [] _ = []
-    highlightString' ((c, pos):xs) ranges@((i, len):ys)
-        | pos == i = "\x1b[102m" ++ c:(highlightString' xs ((i, len):ys)) -- start of highlight range
-        | pos == i + len - 1 = c:"\x1b[0m" ++ (highlightString' xs ys) -- end of highlight range
-        | otherwise = c:(highlightString' xs ranges) -- inside or outside a highlight range
-    highlightString' input [] = map fst input
 
 main :: IO ()
 main = do
@@ -38,10 +27,9 @@ main = do
                     then putStrLn regex
                     else do
                         text <- getLine
-                        let matches = getAllMatches ((text =~ regex) :: AllMatches [] (MatchOffset, MatchLength))
-                        case matches of
-                            [] -> putStrLn "no match"
-                            _ -> putStrLn $ highlightString text matches
+                        case (matchText regex text "\x1b[102m" "\x1b[0m") of
+                            Nothing -> putStrLn "no match"
+                            Just highlightedString -> putStrLn highlightedString
                 Left NoMainMatcher -> error "No main matcher"
                 Left (ParseErrors errors) -> print errors >> error "error parsing commands"
         _ -> putStrLn "incorrect number of command line arguements"

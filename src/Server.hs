@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Main where
 
@@ -9,14 +10,18 @@ import Network.Wai.Middleware.RequestLogger
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.Cors
 import Servant
+import Data.Aeson.Types
+
 import System.IO
+import GHC.Generics
 
 import Compiler (compileProg)
 import Types (CompileError(..))
+import Util (matchText)
 
 -- * api
 
-type Api = "compile" :> ReqBody '[JSON] String :> Post '[JSON] String
+type Api = "match" :> ReqBody '[JSON] RequestBody :> Post '[JSON] String
 
 api :: Proxy Api
 api = Proxy
@@ -42,10 +47,19 @@ corsWithContentType = cors (const $ Just policy)
         { corsRequestHeaders = ["Content-Type"] }
 
 server :: Server Api
-server = compile
+server = match
 
-compile :: String -> Handler String
-compile rawProg = case (compileProg rawProg "main") of
-    Right regex -> return regex
-    Left NoMainMatcher -> return "Error: no main matcher"
-    Left (ParseErrors errors) -> return $ "Error: parsing error: " ++ (show errors)
+match :: RequestBody -> Handler String
+match (RequestBody program' text') = return $ case (compileProg program' "main") of
+    Right regex -> case (matchText regex text' "<mark>" "</mark>") of
+        Nothing -> text'
+        Just highlightedString -> highlightedString
+    Left NoMainMatcher -> "Error: no main matcher"
+    Left (ParseErrors errors) -> "Error: parsing error: " ++ (show errors)
+
+data RequestBody = RequestBody {
+    program :: String,
+    text :: String
+} deriving (Generic)
+
+instance FromJSON RequestBody

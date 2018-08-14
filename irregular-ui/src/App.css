@@ -13,3 +13,8 @@
 .App-title {
   font-size: 1.5em;
 }
+
+#highlightedString {
+  margin: 20px;
+  outline: 0.01em solid black;
+}
