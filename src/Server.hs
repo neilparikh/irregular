@@ -1,10 +1,13 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
 import Network.Wai
+import Network.Wai.Middleware.RequestLogger
 import Network.Wai.Handler.Warp
+import Network.Wai.Middleware.Cors
 import Servant
 import System.IO
 
@@ -30,7 +33,13 @@ main = do
   runSettings settings =<< mkApp
 
 mkApp :: IO Application
-mkApp = return $ serve api server
+mkApp = return $ logStdoutDev $ corsWithContentType $ serve api server
+
+corsWithContentType :: Middleware
+corsWithContentType = cors (const $ Just policy)
+    where
+      policy = simpleCorsResourcePolicy
+        { corsRequestHeaders = ["Content-Type"] }
 
 server :: Server Api
 server = compile

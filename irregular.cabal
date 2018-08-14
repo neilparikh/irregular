@@ -38,7 +38,7 @@ executable server
   build-depends:       base >= 4.7 && < 5
                      , parsec
                      , servant-server
-                     , aeson
-                     , transformers
                      , wai
+                     , wai-extra
+                     , wai-cors
                      , warp
