@@ -51,7 +51,7 @@ class App extends React.Component<{}, IState> {
         </header>
         <ProgramEditor program={program} onChange={this.setProgram}/><br />
         <Text text={text} onChange={this.setText} /><br />
-        <button onClick={this.compile}>Find Matches</button>
+        <button onClick={this.compile}>Find Matches</button><br />
         {highlightedString &&
           <div id="highlightedString" dangerouslySetInnerHTML={{ __html: highlightedString }}/>}
       </div>

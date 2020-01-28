@@ -32,4 +32,5 @@ main = do
                             Just highlightedString -> putStrLn highlightedString
                 Left NoMainMatcher -> error "No main matcher"
                 Left (ParseErrors errors) -> print errors >> error "error parsing commands"
+                Left CyclicDefn -> error "Cyclic definitions are not allowed"
         _ -> putStrLn "incorrect number of command line arguements"

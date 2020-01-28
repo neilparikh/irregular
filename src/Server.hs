@@ -51,11 +51,16 @@ server = match
 
 match :: RequestBody -> Handler String
 match (RequestBody program' text') = return $ case (compileProg program' "main") of
-    Right regex -> case (matchText regex text' "<mark>" "</mark>") of
+    Right regex -> case (matchText regex (replaceNewline text') "<mark>" "</mark>") of
         Nothing -> text'
         Just highlightedString -> highlightedString
     Left NoMainMatcher -> "Error: no main matcher"
     Left (ParseErrors errors) -> "Error: parsing error: " ++ (show errors)
+    Left CyclicDefn -> "Error: cyclic definitions are not allowed"
+    where
+    replaceNewline ('\n':xs) = "<br>" ++ (replaceNewline  xs)
+    replaceNewline (x:xs) = x:(replaceNewline xs)
+    replaceNewline [] = []
 
 data RequestBody = RequestBody {
     program :: String,

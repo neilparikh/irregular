@@ -13,8 +13,10 @@ data Matcher = Lit String -- "abc"                        [x]
              | Matcher `And` Matcher -- ... + ...         [x]
              | NTimes Int Matcher -- 3times(...)          [x]
              | Var String -- foobar                       [x]
+             | Optional Matcher -- optional(...)
              | Raw String -- raw regex: /ab+/             [ ]
              deriving Show
 
 data CompileError = ParseErrors [ParseError]
                   | NoMainMatcher
+                  | CyclicDefn

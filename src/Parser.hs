@@ -14,10 +14,10 @@ definitionParser :: Parser Definition
 definitionParser = (,) <$> (validVarName <* wrapWithSpaces (char '=')) <*> matcherParser
 
 matcherParser :: Parser Matcher
-matcherParser = try orParser <|> try andParser <|> nTimesParser False <|> try (many1Parser False) <|> try (manyParser False) <|> litParser <|> varParser
+matcherParser = try orParser <|> try andParser <|> nTimesParser False <|> try (many1Parser False) <|> try (manyParser False) <|> try (optionalParser False) <|> litParser <|> varParser
 
 parensMatcherParser :: Parser Matcher
-parensMatcherParser = (try $ parens orParser) <|> (try $ parens andParser) <|> nTimesParser True <|> try (many1Parser True) <|> try (manyParser True) <|> litParser <|> varParser
+parensMatcherParser = (try $ parens orParser) <|> (try $ parens andParser) <|> nTimesParser True <|> try (many1Parser True) <|> try (manyParser True) <|> try (optionalParser True) <|> litParser <|> varParser
 
 litParser ::  Parser Matcher
 litParser = Lit <$> doubleQuotes (many (noneOf "\""))
@@ -29,6 +29,11 @@ many1Parser withParens = Many1 <$> (string "oneOrMore(" *> subParser <* char ')'
 
 manyParser :: Bool -> Parser Matcher
 manyParser withParens = Many <$> (string "zeroOrMore(" *> subParser <* char ')')
+    where
+    subParser = if withParens then parensMatcherParser else matcherParser
+
+optionalParser :: Bool -> Parser Matcher
+optionalParser withParens = Optional <$> (string "optional(" *> subParser <* char ')')
     where
     subParser = if withParens then parensMatcherParser else matcherParser
 
