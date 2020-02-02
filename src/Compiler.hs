@@ -1,11 +1,13 @@
-module Compiler where
+module Compiler (compileProg) where
 
 import Data.List (intersperse)
 import Data.Either (isRight, rights, lefts)
 import Data.Maybe (isJust, fromJust)
+import Control.Arrow (second, (&&&))
 
 import Parser (parseDefinition)
 import Types
+import Util (filterMap)
 
 -- type Graph = (String, [String])
 
@@ -30,7 +32,9 @@ isValid env m name = isDag (map defnToGraph env) [] (defnToGraph (name, m))
 isDag :: [(String, [String])] -> [String] -> (String, [String]) -> Bool
 isDag env visited (name, children)
   | name `elem` visited = False
-  | otherwise = all (isDag env (name:visited)) (map (\(a, b) -> (a, fromJust b)) (filter (isJust . snd) (map (\s -> (s, lookup s env)) children)))
+  | otherwise = all (isDag env (name:visited)) nodesPointedTo
+  where
+  nodesPointedTo = filterMap (isJust . snd) (second fromJust) . map (id &&& (`lookup` env)) $ children
 
 compileProg :: String -> String -> Either CompileError String
 compileProg prog mainName
@@ -62,7 +66,7 @@ compile env (OneOf matchers) = concat . intersperse "|" . map (cnc env) $ matche
 compile env (m1 `And` m2) = (cnc env m1) ++ (cnc env m2)
 compile env (NTimes n m) = (cnc env m) ++ "{" ++ show n ++ "}"
 compile env (Optional m) = (cnc env m) ++ "?"
-compile env (Var str) = case (lookup str env) of
+compile env (Var str) = case lookup str env of
     Just m -> compile env m
     Nothing -> error ("undeclared variable " ++ str ++ " used")
     -- FIXME: instead of calling error here, should instead return an Either CompileError String
